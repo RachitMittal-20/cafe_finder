@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Noirbrew</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+      <!-- Header -->
+<header class="nb-header">
+  <div class="nb-logo">
+    <span class="nb-cup">
+      <!-- cup icon using pure CSS -->
+      <span class="cup-body"></span>
+      <span class="cup-handle"></span>
+      <span class="cup-steam s1"></span>
+      <span class="cup-steam s2"></span>
+      <span class="cup-steam s3"></span>
+    </span>
+    <span class="nb-text">NoirBrew</span>
+  </div>
+  
+  <div class="header-actions">
+    <!-- Favorites button -->
+    <button class="header-btn" id="favoritesBtn">
+      <svg class="header-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+      <span class="header-btn-text">Favorites</span>
+    </button>
+    
+    <!-- Dark mode toggle button -->
+    <button class="header-btn icon-only" id="darkModeBtn">
+      <svg class="header-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+</div>
+<div class="content">
+    <!-- Main content goes here -->
+    <div class="pillbox">
+        <span class= "star"> &#10022;  <span class="tagline"> Discover your next perfect spot </span> </span>
+  </div> <br/>
+  <div class="title"> Find Your <span class="titlepart"> Perfect Cafe </span> </div>
+  <div class="tagline2"> Curated coffee spots near you, filtered your way. From cozy<br/><span style="margin-left: 160px;"> corners to vibrant lounges.</span></div>
+  
+  <!-- Three coffee cups -->
+  <div class="cups-container">
+    <div class="coffee-cup">
+      <div class="cup-steam-line s1"></div>
+      <div class="cup-steam-line s2"></div>
+      <div class="cup-steam-line s3"></div>
+      <div class="cup-main">
+        <div class="cup-handle-side"></div>
+      </div>
+    </div>
+    
+    <div class="coffee-cup">
+      <div class="cup-steam-line s1"></div>
+      <div class="cup-steam-line s2"></div>
+      <div class="cup-steam-line s3"></div>
+      <div class="cup-main">
+        <div class="cup-handle-side"></div>
+      </div>
+    </div>
+    
+    <div class="coffee-cup">
+      <div class="cup-steam-line s1"></div>
+      <div class="cup-steam-line s2"></div>
+      <div class="cup-steam-line s3"></div>
+      <div class="cup-main">
+        <div class="cup-handle-side"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="searchbar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search for cafes, areas, or landmarks" style="flex-grow: 1; border: none; outline: none; background: transparent; color: var(--nb-accent); font-size: 16px;">
+</div>
+
+<!-- Filter buttons -->
+<div class="filter-buttons">
+    <button class="filter-btn">
+        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+        </svg>
+        Near me
+    </button>
+    <button class="filter-btn">
+        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        Top rated
+    </button>
+</div>
+
+<!-- Cafe Results Section -->
+<div class="results-section" id="resultsSection">
+    <div class="results-header">
+        <h2 class="results-title" id="resultsTitle">Nearby Cafes</h2>
+        <button class="filter-toggle-btn" id="filterToggleBtn">
+            <svg class="filter-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            Filters
+        </button>
+    </div>
+    <p class="results-count" id="resultsCount">Loading...</p>
+    <div class="cafe-grid" id="cafeGrid">
+        <!-- Cafe cards will be inserted here by JavaScript -->
+    </div>
+</div>
+
+<!-- Favorites Section -->
+<div class="favorites-section hidden" id="favoritesSection">
+    <div class="favorites-header">
+        <button class="back-btn" id="backBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back to explore
+        </button>
+    </div>
+    <div class="favorites-content">
+        <h1 class="favorites-title">
+            <svg class="heart-icon-large" width="40" height="40" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            My Favorites
+        </h1>
+        <p class="favorites-count" id="favoritesCount">0 saved spots</p>
+        
+        <!-- Empty state -->
+        <div class="empty-favorites" id="emptyFavorites">
+            <div class="empty-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </div>
+            <h2 class="empty-title">No favorites yet</h2>
+            <p class="empty-description">Brew your list by tapping the heart on a cafe. Your saved spots will appear here.</p>
+            <button class="explore-btn" id="exploreCafesBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Explore cafes
+            </button>
+        </div>
+        
+        <!-- Favorites grid -->
+        <div class="cafe-grid hidden" id="favoritesGrid">
+            <!-- Favorite cafe cards will be inserted here -->
+        </div>
+    </div>
+</div>
+
+<!-- Filter Modal Overlay -->
+<div class="filter-modal" id="filterModal">
+    <div class="filter-panel">
+        <div class="filter-header">
+            <h2 class="filter-title">Filters</h2>
+            <button class="close-btn" id="closeFilterBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Rating Filter -->
+        <div class="filter-section">
+            <h3 class="filter-section-title">RATING</h3>
+            <div class="filter-options">
+                <button class="filter-option active" data-filter="rating" data-value="any">Any</button>
+                <button class="filter-option" data-filter="rating" data-value="3.5">3.5+</button>
+                <button class="filter-option" data-filter="rating" data-value="4">4+</button>
+                <button class="filter-option" data-filter="rating" data-value="4.5">4.5+</button>
+            </div>
+        </div>
+
+        <!-- Price Filter -->
+        <div class="filter-section">
+            <h3 class="filter-section-title">PRICE</h3>
+            <div class="filter-options">
+                <button class="filter-option price-btn" data-filter="price" data-value="1">100</button>
+                <button class="filter-option price-btn" data-filter="price" data-value="2">1000</button>
+                <button class="filter-option price-btn" data-filter="price" data-value="3">10000</button>
+            </div>
+        </div>
+
+        <!-- Distance Filter -->
+        <div class="filter-section">
+            <h3 class="filter-section-title">MAX DISTANCE</h3>
+            <div class="distance-value" id="distanceValue">10 km</div>
+            <input type="range" class="distance-slider" id="distanceSlider" min="1" max="10" value="10" step="1">
+            <div class="distance-labels">
+                <span>1 km</span>
+                <span>3 km</span>
+                <span>5 km</span>
+                <span>10 km</span>
+            </div>
+        </div>
+
+        <!-- Ambience Filter -->
+        <div class="filter-section">
+            <h3 class="filter-section-title">AMBIENCE</h3>
+            <div class="filter-options">
+                <button class="filter-option" data-filter="ambience" data-value="open-air">Open Air</button>
+                <button class="filter-option" data-filter="ambience" data-value="outdoor">Outdoor</button>
+                <button class="filter-option" data-filter="ambience" data-value="indoor">Indoor</button>
+            </div>
+        </div>
+
+        <!-- Diet Filter -->
+        <div class="filter-section">
+            <h3 class="filter-section-title">DIET</h3>
+            <div class="filter-options">
+                <button class="filter-option" data-filter="diet" data-value="veg">Veg</button>
+                <button class="filter-option" data-filter="diet" data-value="non-veg">Non-Veg</button>
+                <button class="filter-option" data-filter="diet" data-value="vegan">Vegan</button>
+            </div>
+        </div>
+
+        <!-- Experience Filter -->
+        <div class="filter-section">
+            <h3 class="filter-section-title">EXPERIENCE</h3>
+            <div class="filter-options">
+                <button class="filter-option" data-filter="experience" data-value="fine-dining">Fine Dining</button>
+                <button class="filter-option" data-filter="experience" data-value="casual">Casual</button>
+                <button class="filter-option" data-filter="experience" data-value="clubbing">Clubbing</button>
+            </div>
+        </div>
+
+        <!-- Apply Button -->
+        <button class="apply-filters-btn" id="applyFiltersBtn">
+            <span id="applyBtnText">Show cafes</span>
+        </button>
+    </div>
+</div>
+
+</div>
+<script src="main.js"></script>
+</body>
+</html>
