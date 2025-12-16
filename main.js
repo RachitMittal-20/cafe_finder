@@ -37,6 +37,9 @@ let favoriteCafes = JSON.parse(localStorage.getItem('favoriteCafes') || '[]'); /
 let map = null;
 let markers = [];
 let infoWindow = null;
+let directionsService = null;
+let directionsRenderer = null;
+let currentRoute = null;
 
 // Fetch cafes from the API
 async function fetchCafes(location = 'Sydney, Australia') {
@@ -200,7 +203,7 @@ function createCafeCard(cafe) {
                     <span class="status-dot"></span> ${openStatus}
                 </p>` : ''}
                 ${tagsHtml}
-                <button class="directions-btn" onclick="openDirections(${cafe.lat}, ${cafe.lng})">
+                <button class="directions-btn" onclick="openDirections(${cafe.lat}, ${cafe.lng}, '${cafe.name.replace(/'/g, "\\'")}')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
@@ -305,15 +308,131 @@ function toRad(degrees) {
     return degrees * (Math.PI / 180);
 }
 
-// Open directions in Google Maps
-function openDirections(lat, lng) {
-    // If user location is available, include it as origin
-    if (userLocation) {
+// Open directions in Google Maps - with in-app route display option
+function openDirections(lat, lng, cafeName) {
+    // Switch to map view if not already there
+    const mapContainer = document.getElementById('mapContainer');
+    const cafeGrid = document.getElementById('cafeGrid');
+    
+    if (mapContainer && mapContainer.classList.contains('hidden')) {
+        cafeGrid.classList.add('hidden');
+        mapContainer.classList.remove('hidden');
+        
+        // Update toggle buttons
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        const mapBtn = document.querySelector('.toggle-btn[data-view="map"]');
+        if (mapBtn) mapBtn.classList.add('active');
+    }
+    
+    // If user location is available, show route on map
+    if (userLocation && map && googleMapsLoaded) {
+        showDirectionsOnMap(userLocation, {lat: lat, lng: lng}, cafeName);
+    } else if (userLocation) {
+        // Fallback: Open in Google Maps app/website
         window.open(`https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}&travelmode=driving`, '_blank');
     } else {
-        // Just open the destination
+        // No user location, just open destination
         window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
     }
+}
+
+// Show directions on the map
+function showDirectionsOnMap(origin, destination, cafeName) {
+    if (!directionsService) {
+        directionsService = new google.maps.DirectionsService();
+    }
+    
+    if (!directionsRenderer) {
+        directionsRenderer = new google.maps.DirectionsRenderer({
+            map: map,
+            suppressMarkers: false,
+            polylineOptions: {
+                strokeColor: '#d88a3b',
+                strokeWeight: 5,
+                strokeOpacity: 0.8
+            }
+        });
+    }
+    
+    const request = {
+        origin: origin,
+        destination: destination,
+        travelMode: google.maps.TravelMode.DRIVING
+    };
+    
+    directionsService.route(request, (result, status) => {
+        if (status === 'OK') {
+            directionsRenderer.setDirections(result);
+            currentRoute = result;
+            
+            // Show route info panel
+            const route = result.routes[0].legs[0];
+            showRouteInfo(cafeName, route.distance.text, route.duration.text, destination);
+        } else {
+            console.error('Directions request failed:', status);
+            alert('Could not calculate route. Opening in Google Maps...');
+            window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}`, '_blank');
+        }
+    });
+}
+
+// Show route information panel
+function showRouteInfo(cafeName, distance, duration, destination) {
+    // Remove existing route info if present
+    let routeInfo = document.getElementById('routeInfoPanel');
+    if (!routeInfo) {
+        routeInfo = document.createElement('div');
+        routeInfo.id = 'routeInfoPanel';
+        routeInfo.className = 'route-info-panel';
+        document.getElementById('mapContainer').appendChild(routeInfo);
+    }
+    
+    routeInfo.innerHTML = `
+        <div class="route-info-header">
+            <h3>🚗 Directions to ${cafeName}</h3>
+            <button class="close-route-btn" onclick="clearDirections()">✕</button>
+        </div>
+        <div class="route-info-details">
+            <div class="route-stat">
+                <span class="route-icon">📍</span>
+                <div>
+                    <div class="route-label">Distance</div>
+                    <div class="route-value">${distance}</div>
+                </div>
+            </div>
+            <div class="route-stat">
+                <span class="route-icon">⏱️</span>
+                <div>
+                    <div class="route-label">Duration</div>
+                    <div class="route-value">${duration}</div>
+                </div>
+            </div>
+        </div>
+        <div class="route-actions">
+            <button class="route-action-btn primary" onclick="window.open('https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${destination.lat},${destination.lng}&travelmode=driving', '_blank')">
+                Open in Google Maps
+            </button>
+            <button class="route-action-btn" onclick="clearDirections()">
+                Clear Route
+            </button>
+        </div>
+    `;
+    
+    routeInfo.style.display = 'block';
+}
+
+// Clear directions from map
+function clearDirections() {
+    if (directionsRenderer) {
+        directionsRenderer.setDirections({routes: []});
+    }
+    
+    const routeInfo = document.getElementById('routeInfoPanel');
+    if (routeInfo) {
+        routeInfo.style.display = 'none';
+    }
+    
+    currentRoute = null;
 }
 
 // Search functionality
@@ -677,7 +796,7 @@ function createInfoWindowContent(cafe) {
             </div>
             ${openStatus ? `<div style="font-size: 13px; margin: 5px 0;">${openStatus}</div>` : ''}
             <p class="cafe-address">${cafe.address}</p>
-            <button class="directions-btn" onclick="openDirections(${cafe.lat}, ${cafe.lng})">
+            <button class="directions-btn" onclick="openDirections(${cafe.lat}, ${cafe.lng}, '${cafe.name.replace(/'/g, "\\'")}')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>

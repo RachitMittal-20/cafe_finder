@@ -460,6 +460,117 @@ body.light-mode {
     margin: 10px 0 30px;
 }
 
+/* View Toggle (List/Map buttons) */
+.view-toggle {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 28px;
+    background-color: transparent;
+    border: 2px solid var(--border-color);
+    border-radius: 30px;
+    color: var(--text-primary);
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+}
+
+.toggle-btn:hover {
+    border-color: var(--nb-accent);
+    color: #000;
+    background-color: var(--nb-accent);
+    box-shadow: 0px 4px 15px rgba(216, 138, 59, 0.2);
+    transform: translateY(-2px);
+}
+
+.toggle-btn.active {
+    border-color: var(--nb-accent);
+    background-color: var(--nb-accent);
+    color: #000;
+    box-shadow: 0px 4px 15px rgba(216, 138, 59, 0.3);
+}
+
+.toggle-btn:active {
+    transform: translateY(0px);
+}
+
+.toggle-btn:focus {
+    outline: none;
+}
+
+/* Light mode adjustments */
+body.light-mode .toggle-btn:hover,
+body.light-mode .toggle-btn.active {
+    color: #fff;
+}
+
+/* Map Container */
+.map-container {
+    width: 100%;
+    height: 600px;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 8px 24px rgba(216, 138, 59, 0.1);
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+.map-controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+}
+
+.back-to-list-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background-color: var(--card-bg);
+    border: 2px solid var(--nb-accent);
+    border-radius: 30px;
+    color: var(--nb-accent);
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.back-to-list-btn:hover {
+    background-color: var(--nb-accent);
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(216, 138, 59, 0.3);
+}
+
+.back-to-list-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+}
+
 /* Cafe Grid */
 .cafe-grid {
     display: grid;
@@ -494,6 +605,23 @@ body.light-mode .cafe-card {
     background-size: cover;
     background-position: center;
     background-color: rgba(50, 40, 35, 0.5);
+    overflow: hidden;
+}
+
+.cafe-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);
+    z-index: 1;
+}
+
+.cafe-card:hover .cafe-image {
+    transform: scale(1.05);
+    transition: transform 0.5s ease;
 }
 
 .favorite-btn {
@@ -1076,4 +1204,230 @@ body.light-mode .cafe-tag {
 /* Utility class */
 .hidden {
     display: none !important;
+}
+
+/* ===============================================
+   ROUTE INFO PANEL (for in-app directions)
+   =============================================== */
+
+.route-info-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--card-bg);
+    border: 2px solid var(--nb-accent);
+    border-radius: 16px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(216, 138, 59, 0.25);
+    z-index: 1000;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.route-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.route-info-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.close-route-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-route-btn:hover {
+    background-color: rgba(216, 138, 59, 0.1);
+    color: var(--nb-accent);
+}
+
+.route-info-details {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.route-stat {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: rgba(216, 138, 59, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(216, 138, 59, 0.2);
+}
+
+.route-icon {
+    font-size: 24px;
+}
+
+.route-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.route-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--nb-accent);
+}
+
+.route-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.route-action-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid var(--nb-accent);
+    background-color: transparent;
+    color: var(--nb-accent);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.route-action-btn:hover {
+    background-color: rgba(216, 138, 59, 0.1);
+    transform: translateY(-2px);
+}
+
+.route-action-btn.primary {
+    background-color: var(--nb-accent);
+    color: #050404;
+}
+
+.route-action-btn.primary:hover {
+    background-color: #c46a2f;
+    box-shadow: 0 4px 12px rgba(216, 138, 59, 0.3);
+}
+
+/* Enhanced cafe card styling */
+.cafe-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.cafe-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--nb-accent), #c46a2f);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cafe-card:hover::before {
+    opacity: 1;
+}
+
+/* Enhanced directions button */
+.directions-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.directions-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.directions-btn:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Map info window enhanced styling */
+.map-info-window {
+    padding: 8px;
+    min-width: 250px;
+}
+
+.map-info-window .cafe-name {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #1a1512;
+    font-weight: 600;
+}
+
+.map-info-window .cafe-rating {
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.map-info-window .cafe-address {
+    font-size: 13px;
+    color: #6d5f52;
+    margin: 8px 0;
+}
+
+.map-info-window .directions-btn {
+    margin-top: 12px;
+    width: 100%;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .route-info-panel {
+        width: 95%;
+        padding: 16px;
+    }
+    
+    .route-info-details {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .route-actions {
+        flex-direction: column;
+    }
 }
