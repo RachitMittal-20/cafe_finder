@@ -146,14 +146,23 @@ if __name__ == '__main__':
     if not os.getenv('GOOGLE_MAPS_API_KEY'):
         print("WARNING: GOOGLE_MAPS_API_KEY not set!")
     
+    # Get port from environment variable (for production) or use 5001 for local
+    port = int(os.getenv('PORT', 5001))
+    is_production = os.getenv('PORT') is not None
+    
     print("\n" + "="*60)
     print("🚀 NoirBrew Backend Server Starting...")
     print("="*60)
-    print(f"📍 Server URL: http://127.0.0.1:5001")
+    print(f"📍 Environment: {'Production' if is_production else 'Development'}")
+    print(f"📍 Server Port: {port}")
     print(f"🗺️  Google Maps API: {'✅ Configured' if os.getenv('GOOGLE_MAPS_API_KEY') else '❌ Not Set'}")
     print("="*60 + "\n")
     
-    # Run with use_reloader=False to avoid issues with background processes
-    # Using port 5001 because macOS AirPlay uses port 5000
-    app.run(debug=True, port=5001, use_reloader=False)
+    # Run with production settings if PORT is set, otherwise development
+    if is_production:
+        # Production mode: bind to 0.0.0.0 to accept external connections
+        app.run(host='0.0.0.0', port=port, debug=False)
+    else:
+        # Development mode: localhost only
+        app.run(host='127.0.0.1', port=port, debug=True, use_reloader=False)
 

@@ -1,6 +1,8 @@
 // API configuration
-// Note: Using port 5001 because macOS AirPlay uses port 5000
-const API_BASE_URL = 'http://localhost:5001/api';
+// Automatically use the correct API URL based on environment
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5001/api'  // Development
+    : `${window.location.origin}/api`;  // Production
 
 // Google Maps API key (loaded from backend)
 let GOOGLE_MAPS_API_KEY = null;
