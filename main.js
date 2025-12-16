@@ -1,5 +1,10 @@
 // API configuration
-const API_BASE_URL = 'http://localhost:5000/api';
+// Note: Using port 5001 because macOS AirPlay uses port 5000
+const API_BASE_URL = 'http://localhost:5001/api';
+
+// Google Maps API key (loaded from backend)
+let GOOGLE_MAPS_API_KEY = null;
+let googleMapsLoaded = false;
 
 // Get the input field
 const searchInput = document.getElementById('searchInput');
@@ -28,6 +33,11 @@ let allCafes = []; // Store all cafes for filtering
 let userLocation = null; // Store user's current location for distance calculation
 let favoriteCafes = JSON.parse(localStorage.getItem('favoriteCafes') || '[]'); // Store favorite cafe IDs
 
+// Google Maps variables
+let map = null;
+let markers = [];
+let infoWindow = null;
+
 // Fetch cafes from the API
 async function fetchCafes(location = 'Sydney, Australia') {
     // Show loading state
@@ -54,6 +64,7 @@ async function fetchCafes(location = 'Sydney, Australia') {
         
         allCafes = data.cafes; // Store all cafes for filtering
         displayCafes(data.cafes);
+        initializeMap(data.cafes);
     } catch (error) {
         console.error('Error fetching cafes:', error);
         cafeGrid.innerHTML = `
@@ -323,8 +334,15 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
         if (buttonText === 'Near me') {
             fetchNearbyCafes();
         } else if (buttonText === 'Top rated') {
-            // Implement top rated filtering
-            alert('Top rated filter - Coming soon!');
+            // Filter cafes by rating
+            const sortedCafes = [...allCafes].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            displayCafes(sortedCafes);
+            if (map && markers.length > 0) {
+                addCafeMarkers(sortedCafes);
+            }
+        } else if (buttonText === 'Map view') {
+            // Switch to map view
+            switchToMapView();
         }
     });
 });
@@ -399,6 +417,11 @@ function applyFilters() {
     // Display filtered cafes
     displayCafes(filteredCafes);
     
+    // Update map markers
+    if (map && markers.length > 0) {
+        addCafeMarkers(filteredCafes);
+    }
+    
     // Update button text
     const count = filteredCafes.length;
     document.getElementById('applyBtnText').textContent = `Show ${count} cafe${count !== 1 ? 's' : ''}`;
@@ -428,6 +451,11 @@ function resetFilters() {
     
     // Show all cafes
     displayCafes(allCafes);
+    
+    // Update map markers
+    if (map && markers.length > 0) {
+        addCafeMarkers(allCafes);
+    }
 }
 
 // Event listeners for filter modal
@@ -510,13 +538,398 @@ backBtn.addEventListener('click', showExplorePage);
 const exploreCafesBtn = document.getElementById('exploreCafesBtn');
 exploreCafesBtn.addEventListener('click', showExplorePage);
 
-// Dark mode toggle (placeholder - can be implemented later)
+// Dark mode toggle functionality
 const darkModeBtn = document.getElementById('darkModeBtn');
+
+// Check for saved theme preference or default to dark mode
+const currentTheme = localStorage.getItem('theme') || 'dark';
+if (currentTheme === 'light') {
+    document.body.classList.add('light-mode');
+}
+
+// Update the dark mode button icon based on current theme
+function updateDarkModeIcon() {
+    const isDarkMode = !document.body.classList.contains('light-mode');
+    const iconPath = darkModeBtn.querySelector('svg path');
+    
+    if (isDarkMode) {
+        // Moon icon (current dark mode)
+        iconPath.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
+    } else {
+        // Sun icon (light mode active)
+        iconPath.setAttribute('d', 'M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41');
+    }
+}
+
+// Initialize icon on page load
+updateDarkModeIcon();
+
 darkModeBtn.addEventListener('click', function() {
-    alert('Dark mode coming soon! The current theme already has a dark aesthetic.');
+    // Toggle light mode class
+    document.body.classList.toggle('light-mode');
+    
+    // Save preference to localStorage
+    const theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+    localStorage.setItem('theme', theme);
+    
+    // Update the icon
+    updateDarkModeIcon();
 });
 
-// Load default cafes on page load
-window.addEventListener('DOMContentLoaded', () => {
-    fetchCafes('Sydney, Australia'); // Change default location as needed
+// Initialize Google Map
+function initializeMap(cafes) {
+    if (!cafes || cafes.length === 0) return;
+    
+    // Get the center point (first cafe or user location)
+    const center = userLocation || { lat: cafes[0].lat, lng: cafes[0].lng };
+    
+    // Create map
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: center,
+        zoom: 13,
+        styles: getMapStyles(),
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: true
+    });
+    
+    // Create info window
+    infoWindow = new google.maps.InfoWindow();
+    
+    // Add user location marker if available
+    if (userLocation) {
+        new google.maps.Marker({
+            position: userLocation,
+            map: map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: '#4285F4',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 2
+            },
+            title: 'Your Location'
+        });
+    }
+    
+    // Add markers for cafes
+    addCafeMarkers(cafes);
+}
+
+// Add markers for cafes
+function addCafeMarkers(cafes) {
+    // Clear existing markers
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+    
+    cafes.forEach((cafe, index) => {
+        const marker = new google.maps.Marker({
+            position: { lat: cafe.lat, lng: cafe.lng },
+            map: map,
+            title: cafe.name,
+            animation: google.maps.Animation.DROP,
+            icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="32" height="42" viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 0C9.373 0 4 5.373 4 12c0 9 12 30 12 30s12-21 12-30c0-6.627-5.373-12-12-12z" fill="#d88a3b"/>
+                        <circle cx="16" cy="12" r="6" fill="#050404"/>
+                        <text x="16" y="16" font-size="10" fill="#d88a3b" text-anchor="middle" font-weight="bold">☕</text>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(32, 42),
+                anchor: new google.maps.Point(16, 42)
+            }
+        });
+        
+        // Add click listener to show info window
+        marker.addListener('click', () => {
+            const content = createInfoWindowContent(cafe);
+            infoWindow.setContent(content);
+            infoWindow.open(map, marker);
+        });
+        
+        markers.push(marker);
+    });
+    
+    // Fit map to show all markers
+    if (markers.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        if (userLocation) {
+            bounds.extend(userLocation);
+        }
+        markers.forEach(marker => bounds.extend(marker.getPosition()));
+        map.fitBounds(bounds);
+    }
+}
+
+// Create info window content
+function createInfoWindowContent(cafe) {
+    const rating = cafe.rating ? cafe.rating.toFixed(1) : 'N/A';
+    const ratingsCount = cafe.user_ratings_total ? `(${cafe.user_ratings_total})` : '';
+    const openStatus = cafe.is_open !== null ? (cafe.is_open ? '🟢 Open' : '🔴 Closed') : '';
+    
+    return `
+        <div class="map-info-window">
+            <h3 class="cafe-name">${cafe.name}</h3>
+            <div class="cafe-rating">
+                <span>⭐ ${rating}</span> ${ratingsCount}
+            </div>
+            ${openStatus ? `<div style="font-size: 13px; margin: 5px 0;">${openStatus}</div>` : ''}
+            <p class="cafe-address">${cafe.address}</p>
+            <button class="directions-btn" onclick="openDirections(${cafe.lat}, ${cafe.lng})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+                Get directions
+            </button>
+        </div>
+    `;
+}
+
+// Map styles for dark/light mode
+function getMapStyles() {
+    const isDarkMode = !document.body.classList.contains('light-mode');
+    
+    if (isDarkMode) {
+        return [
+            { elementType: "geometry", stylers: [{ color: "#1a1512" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#1a1512" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#9e8c7b" }] },
+            {
+                featureType: "administrative.locality",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d88a3b" }]
+            },
+            {
+                featureType: "poi",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#9e8c7b" }]
+            },
+            {
+                featureType: "poi.park",
+                elementType: "geometry",
+                stylers: [{ color: "#263c3f" }]
+            },
+            {
+                featureType: "poi.park",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#6b9a76" }]
+            },
+            {
+                featureType: "road",
+                elementType: "geometry",
+                stylers: [{ color: "#2d2520" }]
+            },
+            {
+                featureType: "road",
+                elementType: "geometry.stroke",
+                stylers: [{ color: "#212a37" }]
+            },
+            {
+                featureType: "road",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#9ca5b3" }]
+            },
+            {
+                featureType: "road.highway",
+                elementType: "geometry",
+                stylers: [{ color: "#3d3026" }]
+            },
+            {
+                featureType: "road.highway",
+                elementType: "geometry.stroke",
+                stylers: [{ color: "#1f2835" }]
+            },
+            {
+                featureType: "road.highway",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d88a3b" }]
+            },
+            {
+                featureType: "transit",
+                elementType: "geometry",
+                stylers: [{ color: "#2f3948" }]
+            },
+            {
+                featureType: "transit.station",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#d88a3b" }]
+            },
+            {
+                featureType: "water",
+                elementType: "geometry",
+                stylers: [{ color: "#17263c" }]
+            },
+            {
+                featureType: "water",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#515c6d" }]
+            },
+            {
+                featureType: "water",
+                elementType: "labels.text.stroke",
+                stylers: [{ color: "#17263c" }]
+            }
+        ];
+    } else {
+        return [
+            {
+                featureType: "poi.business",
+                stylers: [{ visibility: "off" }]
+            },
+            {
+                featureType: "poi.park",
+                elementType: "labels.text.fill",
+                stylers: [{ color: "#447530" }]
+            }
+        ];
+    }
+}
+
+// Switch to map view function
+function switchToMapView() {
+    const resultsSection = document.getElementById('resultsSection');
+    const mapContainer = document.getElementById('mapContainer');
+    const cafeGrid = document.getElementById('cafeGrid');
+    
+    // Scroll to results section
+    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Show map, hide grid
+    setTimeout(() => {
+        cafeGrid.classList.add('hidden');
+        mapContainer.classList.remove('hidden');
+        
+        // Update toggle buttons
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.toggle-btn[data-view="map"]').classList.add('active');
+        
+        // Trigger map resize and fit bounds
+        if (map) {
+            google.maps.event.trigger(map, 'resize');
+            if (markers.length > 0) {
+                const bounds = new google.maps.LatLngBounds();
+                if (userLocation) bounds.extend(userLocation);
+                markers.forEach(marker => bounds.extend(marker.getPosition()));
+                map.fitBounds(bounds);
+            }
+        }
+    }, 500);
+}
+
+// View toggle functionality
+const viewToggle = document.getElementById('viewToggle');
+const mapContainer = document.getElementById('mapContainer');
+
+viewToggle.addEventListener('click', (e) => {
+    const btn = e.target.closest('.toggle-btn');
+    if (!btn) return;
+    
+    const view = btn.getAttribute('data-view');
+    
+    // Update active button
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Toggle views
+    if (view === 'map') {
+        cafeGrid.classList.add('hidden');
+        mapContainer.classList.remove('hidden');
+        // Trigger map resize to ensure proper rendering
+        if (map) {
+            google.maps.event.trigger(map, 'resize');
+            if (markers.length > 0) {
+                const bounds = new google.maps.LatLngBounds();
+                if (userLocation) bounds.extend(userLocation);
+                markers.forEach(marker => bounds.extend(marker.getPosition()));
+                map.fitBounds(bounds);
+            }
+        }
+    } else {
+        cafeGrid.classList.remove('hidden');
+        mapContainer.classList.add('hidden');
+    }
 });
+
+// Back to list button handler
+const backToListBtn = document.getElementById('backToListBtn');
+if (backToListBtn) {
+    backToListBtn.addEventListener('click', () => {
+        cafeGrid.classList.remove('hidden');
+        mapContainer.classList.add('hidden');
+        
+        // Update toggle buttons
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.toggle-btn[data-view="list"]').classList.add('active');
+    });
+}
+
+// Update map styles when theme changes
+const originalDarkModeToggle = darkModeBtn.onclick;
+darkModeBtn.addEventListener('click', function() {
+    // Update map styles if map exists
+    if (map) {
+        setTimeout(() => {
+            map.setOptions({ styles: getMapStyles() });
+        }, 100);
+    }
+});
+
+// Load Google Maps API dynamically
+async function loadGoogleMapsAPI() {
+    try {
+        // Fetch API key from backend
+        const response = await fetch(`${API_BASE_URL}/config`);
+        if (!response.ok) {
+            throw new Error('Failed to load configuration');
+        }
+        
+        const config = await response.json();
+        GOOGLE_MAPS_API_KEY = config.googleMapsApiKey;
+        
+        // Load Google Maps script dynamically
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        
+        return new Promise((resolve, reject) => {
+            script.onload = () => {
+                googleMapsLoaded = true;
+                resolve();
+            };
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    } catch (error) {
+        console.error('Error loading Google Maps API:', error);
+        throw error;
+    }
+}
+
+// Initialize app
+async function initializeApp() {
+    try {
+        // Load Google Maps API first
+        await loadGoogleMapsAPI();
+        
+        // Then fetch default cafes
+        fetchCafes('Sydney, Australia'); // Change default location as needed
+    } catch (error) {
+        console.error('Error initializing app:', error);
+        cafeGrid.innerHTML = `
+            <div class="error-message">
+                Failed to initialize the application.
+                <br><br>
+                Please make sure the backend server is running.
+                <br><br>
+                Error: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Load app on page load
+window.addEventListener('DOMContentLoaded', initializeApp);

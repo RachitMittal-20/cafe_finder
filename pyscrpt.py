@@ -40,19 +40,20 @@ def find_cafes(location, radius=5000, cafe_type='cafe'):
         
         for place in results.get('results', [])[:8]:  # Limit to 8 results
             place_id = place['place_id']
+            
+            # Get photo URL if available (from nearby search results)
+            photo_url = None
+            if 'photos' in place and len(place['photos']) > 0:
+                photo_reference = place['photos'][0]['photo_reference']
+                photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={os.getenv('GOOGLE_MAPS_API_KEY')}"
+            
             details = gmaps.place(
                 place_id=place_id, 
                 fields=['name', 'formatted_address', 'rating', 'geometry', 'opening_hours', 
-                        'price_level', 'photos', 'user_ratings_total']
+                        'price_level', 'user_ratings_total']
             )
             
             result = details.get('result', {})
-            
-            # Get photo URL if available
-            photo_url = None
-            if 'photos' in result and len(result['photos']) > 0:
-                photo_reference = result['photos'][0]['photo_reference']
-                photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference={photo_reference}&key={os.getenv('GOOGLE_MAPS_API_KEY')}"
             
             # Get opening hours
             is_open = None
@@ -79,7 +80,13 @@ def find_cafes(location, radius=5000, cafe_type='cafe'):
         
         return cafes
     except Exception as e:
-        print(f"Error fetching cafes: {e}")
+        error_msg = str(e)
+        print(f"Error fetching cafes: {error_msg}")
+        
+        # Check if it's an API restriction error
+        if "REQUEST_DENIED" in error_msg or "referer" in error_msg.lower():
+            raise Exception("API key has referer restrictions. Please update API key settings in Google Cloud Console to allow server-side requests.")
+        
         return []
 
 @app.route('/api/cafes', methods=['GET'])
@@ -127,9 +134,26 @@ def get_nearby_cafes():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/config', methods=['GET'])
+def get_config():
+    """Securely provide Google Maps API key to frontend"""
+    return jsonify({
+        'googleMapsApiKey': API_KEY
+    })
+
 if __name__ == '__main__':
     # Make sure to set GOOGLE_MAPS_API_KEY environment variable
     if not os.getenv('GOOGLE_MAPS_API_KEY'):
         print("WARNING: GOOGLE_MAPS_API_KEY not set!")
-    app.run(debug=True, port=5000)
+    
+    print("\n" + "="*60)
+    print("🚀 NoirBrew Backend Server Starting...")
+    print("="*60)
+    print(f"📍 Server URL: http://127.0.0.1:5001")
+    print(f"🗺️  Google Maps API: {'✅ Configured' if os.getenv('GOOGLE_MAPS_API_KEY') else '❌ Not Set'}")
+    print("="*60 + "\n")
+    
+    # Run with use_reloader=False to avoid issues with background processes
+    # Using port 5001 because macOS AirPlay uses port 5000
+    app.run(debug=True, port=5001, use_reloader=False)
 
