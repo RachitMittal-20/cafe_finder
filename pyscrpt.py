@@ -1,10 +1,10 @@
 import googlemaps
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from pathlib import Path
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)  # Enable CORS for frontend requests
 
 # Load environment variables from .env file if it exists
@@ -140,6 +140,21 @@ def get_config():
     return jsonify({
         'googleMapsApiKey': API_KEY
     })
+
+# Serve the main HTML file
+@app.route('/')
+def index():
+    """Serve the main index.html file"""
+    return send_from_directory('.', 'index.html')
+
+# Serve static files (CSS, JS, etc.)
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files"""
+    if os.path.exists(path):
+        return send_from_directory('.', path)
+    # If file doesn't exist, serve index.html for client-side routing
+    return send_from_directory('.', 'index.html')
 
 if __name__ == '__main__':
     # Make sure to set GOOGLE_MAPS_API_KEY environment variable
