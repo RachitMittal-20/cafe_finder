@@ -37,6 +37,18 @@ html {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   scroll-behavior: smooth;
   overflow-x: hidden;
+  scroll-padding-top: 80px; /* Offset for fixed header */
+}
+
+/* Enhanced smooth scrolling for all browsers */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  * {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Better touch targets for mobile */
@@ -65,6 +77,22 @@ a,
 .toggle-btn {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hardware acceleration for better performance */
+.cafe-card,
+.filter-btn,
+.toggle-btn,
+.header-btn,
+.searchbar,
+.filter-modal,
+.map-container {
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 body {
@@ -82,7 +110,10 @@ body {
     #050404;
   color: var(--text-primary);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: hidden;
+  position: relative;
 }
 
 /* Light mode background */
@@ -105,9 +136,17 @@ body.light-mode {
     height: 60px;
     background-color: var(--header-bg);
     color: var(--nb-accent);
-    position:fixed;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     box-shadow: 0 2px 8px rgba(215, 138, 75, 0.1);
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 .title {
     display: inline-block;
@@ -161,8 +200,24 @@ body.light-mode {
   font-size: 15px;
   font-weight: 400;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: -10px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Smooth hover effect with pseudo-element */
+.header-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--nb-accent);
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
 }
 
 /* Icon only button (dark mode) */
@@ -189,6 +244,12 @@ body.light-mode {
 .header-btn:hover {
   background-color: var(--nb-accent);
   color: rgb(0, 0, 0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(216, 138, 59, 0.3);
+}
+
+.header-btn:hover::before {
+  opacity: 1;
 }
 
 /* Header button active state */
@@ -628,7 +689,29 @@ body.light-mode .toggle-btn.active {
     border: 1px solid var(--border-color);
     border-radius: 16px;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    opacity: 0;
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Stagger animation for multiple cards */
+.cafe-card:nth-child(1) { animation-delay: 0.1s; }
+.cafe-card:nth-child(2) { animation-delay: 0.2s; }
+.cafe-card:nth-child(3) { animation-delay: 0.3s; }
+.cafe-card:nth-child(4) { animation-delay: 0.4s; }
+.cafe-card:nth-child(5) { animation-delay: 0.5s; }
+.cafe-card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 body.light-mode .cafe-card {
@@ -636,9 +719,9 @@ body.light-mode .cafe-card {
 }
 
 .cafe-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(1.02);
     border-color: var(--nb-accent);
-    box-shadow: 0 8px 24px rgba(216, 138, 59, 0.15);
+    box-shadow: 0 12px 32px rgba(216, 138, 59, 0.2);
 }
 
 .cafe-image {
@@ -649,6 +732,7 @@ body.light-mode .cafe-card {
     background-position: center;
     background-color: rgba(50, 40, 35, 0.5);
     overflow: hidden;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cafe-image::before {
@@ -663,8 +747,8 @@ body.light-mode .cafe-card {
 }
 
 .cafe-card:hover .cafe-image {
-    transform: scale(1.05);
-    transition: transform 0.5s ease;
+    transform: scale(1.08);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .favorite-btn {
@@ -680,18 +764,28 @@ body.light-mode .cafe-card {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: white;
+    z-index: 2;
 }
 
 .favorite-btn:hover {
     background-color: var(--nb-accent);
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 4px 12px rgba(216, 138, 59, 0.4);
 }
 
 .favorite-btn.is-favorite {
     background-color: var(--nb-accent);
     color: #000;
+    animation: heartBeat 0.5s ease-in-out;
+}
+
+@keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1.1); }
+    75% { transform: scale(1.15); }
 }
 
 .cafe-rating {
@@ -1474,12 +1568,24 @@ body.light-mode .cafe-tag {
         gap: 25px;
     }
     
+    .pillbox {
+        margin-left: 25%;
+    }
+    
     .title {
-        font-size: 24px;
+        font-size: 56px;
+        margin-left: 10%;
     }
     
     .tagline2 {
-        font-size: 14px;
+        font-size: 20px;
+        margin-left: 15%;
+        margin-right: 15%;
+    }
+
+    .searchbar {
+        width: 85%;
+        max-width: 700px;
     }
 }
 
@@ -1507,15 +1613,25 @@ body.light-mode .cafe-tag {
     .content {
         padding: 0 20px;
     }
+
+    .pillbox {
+        margin-left: 20px;
+        margin-top: 120px;
+        font-size: 14px;
+        padding: 8px 16px;
+    }
     
     .title {
-        font-size: 22px;
+        font-size: 42px;
+        margin-left: 20px;
         margin-top: 20px;
     }
     
     .tagline2 {
-        font-size: 13px;
-        text-align: center;
+        font-size: 18px;
+        margin-left: 20px;
+        margin-right: 20px;
+        margin-top: 30px;
     }
     
     .tagline2 br {
@@ -1524,11 +1640,12 @@ body.light-mode .cafe-tag {
     
     .tagline2 span {
         margin-left: 0 !important;
+        display: inline;
     }
     
     .cups-container {
         gap: 15px;
-        margin: 20px 0;
+        margin: 30px 0 20px;
     }
     
     .coffee-cup {
@@ -1538,11 +1655,14 @@ body.light-mode .cafe-tag {
     /* Search Bar */
     .searchbar {
         width: 90%;
+        max-width: 90%;
+        height: 70px;
         padding: 12px 20px;
+        margin-top: 50px;
     }
     
     .search-input {
-        font-size: 14px;
+        font-size: 15px;
     }
     
     /* Filter Buttons */
@@ -1550,6 +1670,7 @@ body.light-mode .cafe-tag {
         flex-wrap: wrap;
         gap: 10px;
         justify-content: center;
+        padding: 0 20px;
     }
     
     .filter-btn {
@@ -1684,7 +1805,7 @@ body.light-mode .cafe-tag {
     }
     
     .nb-logo {
-        gap: 8px;
+        gap: 6px;
     }
     
     .nb-text {
@@ -1696,46 +1817,76 @@ body.light-mode .cafe-tag {
     }
     
     .header-icon {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
     
     /* Hero Section */
     .pillbox {
-        padding: 8px 16px;
+        padding: 6px 14px;
+        font-size: 12px;
+        margin-left: 10px;
+        margin-top: 100px;
+    }
+
+    .star {
+        font-size: 12px;
+    }
+
+    .tagline {
         font-size: 12px;
     }
     
     .title {
-        font-size: 20px;
+        font-size: 32px;
+        margin-left: 10px;
+        margin-top: 15px;
+        line-height: 1.2;
     }
     
     .tagline2 {
-        font-size: 12px;
-        padding: 0 10px;
+        font-size: 15px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-top: 25px;
+        line-height: 1.5;
     }
     
     .cups-container {
         gap: 10px;
+        margin: 25px 0 15px;
     }
     
     .coffee-cup {
-        transform: scale(0.7);
+        transform: scale(0.6);
+    }
+    
+    .cups-container {
+        gap: 10px;
+        margin: 25px 0 15px;
+    }
+    
+    .coffee-cup {
+        transform: scale(0.6);
     }
     
     /* Search Bar */
     .searchbar {
         width: 95%;
+        height: 60px;
         padding: 10px 16px;
+        margin-top: 40px;
+        border-radius: 16px;
     }
     
     .search-input {
-        font-size: 13px;
+        font-size: 14px;
     }
     
     /* Filter Buttons */
     .filter-buttons {
         padding: 0 10px;
+        gap: 8px;
     }
     
     .filter-btn {
@@ -1842,18 +1993,32 @@ body.light-mode .cafe-tag {
     }
 }
 
-/* Landscape Orientation for Phones */
+/* Landscape Orientation for Phones and Small Tablets */
 @media (max-width: 896px) and (orientation: landscape) {
     .content {
         margin-top: 40px;
     }
+
+    .pillbox {
+        margin-top: 80px;
+    }
     
     .title {
         margin-top: 10px;
+        font-size: 36px;
     }
     
     .cups-container {
         display: none; /* Hide decorative elements in landscape */
+    }
+
+    .tagline2 {
+        font-size: 14px;
+        margin-top: 15px;
+    }
+
+    .searchbar {
+        margin-top: 30px;
     }
     
     .results-section {
@@ -1886,13 +2051,31 @@ body.light-mode .cafe-tag {
     .nb-text {
         font-size: 16px;
     }
-    
-    .title {
-        font-size: 18px;
+
+    .pillbox {
+        font-size: 11px;
+        padding: 5px 12px;
+        margin-left: 5px;
     }
     
+    .title {
+        font-size: 28px;
+        margin-left: 5px;
+    }
+    
+    .tagline2 {
+        font-size: 14px;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
     .searchbar {
         padding: 8px 12px;
+        height: 55px;
+    }
+
+    .search-input {
+        font-size: 13px;
     }
     
     .filter-btn {
@@ -1915,6 +2098,17 @@ body.light-mode .cafe-tag {
     
     .map-container {
         height: 300px;
+    }
+}
+
+/* Larger Devices (Desktop) - Enhanced Experience */
+@media (min-width: 1440px) {
+    .cafe-grid {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+
+    .searchbar {
+        max-width: 900px;
     }
 }
 
