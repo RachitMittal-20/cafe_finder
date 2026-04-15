@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>NoirBrew - Find Your Perfect Cafe</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Discover your next perfect cafe spot. Curated coffee spots near you, filtered your way.">
+    <meta name="theme-color" content="#d88a3b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="main.css?v=20260415">
+</head>
+<body class="is-loading">
+    <div class="intro-loader" id="introLoader" aria-hidden="true">
+        <div class="intro-loader-inner">
+            <div class="loader-scene">
+                <div class="loader-pin" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 21s7-7.2 7-12a7 7 0 1 0-14 0c0 4.8 7 12 7 12z"></path>
+                        <circle cx="12" cy="9" r="2.5"></circle>
+                    </svg>
+                </div>
+                <div class="loader-pour" aria-hidden="true"></div>
+                <div class="loader-steam" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="loader-cup-wrap" aria-hidden="true">
+                    <div class="loader-cup"></div>
+                    <div class="loader-cup-mask">
+                        <div class="loader-coffee-fill"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="loader-wordmark">NoirBrew</div>
+            <div class="loader-tagline">Pouring your next cafe escape</div>
+        </div>
+    </div>
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+    <div class="orbs" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="grid-glow" aria-hidden="true"></div>
+    <div class="scroll-line" id="scrollLine" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                </svg>
+            </div>
+            <span>NoirBrew</span>
+        </div>
+
+        <div class="header-actions">
+            <button class="header-btn" id="favoritesBtn" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span>Saved</span>
+            </button>
+            <button class="theme-toggle" id="darkModeBtn" type="button" aria-label="Switch to light mode" aria-pressed="false">
+                <span class="theme-toggle-track">
+                    <span class="theme-toggle-icon theme-toggle-moon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79"></path>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle-icon theme-toggle-sun" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 2v2"></path>
+                            <path d="M12 20v2"></path>
+                            <path d="m4.93 4.93 1.41 1.41"></path>
+                            <path d="m17.66 17.66 1.41 1.41"></path>
+                            <path d="M2 12h2"></path>
+                            <path d="M20 12h2"></path>
+                            <path d="m6.34 17.66-1.41 1.41"></path>
+                            <path d="m19.07 4.93-1.41 1.41"></path>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle-thumb" aria-hidden="true"></span>
+                </span>
+            </button>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="hero">
+            <div class="hero-copy">
+                <div class="eyebrow reveal">Curated coffee atlas</div>
+                <h1 class="hero-title reveal reveal-delay-1">Find Your<br><em>Perfect Cafe</em></h1>
+                <p class="hero-sub reveal reveal-delay-2">
+                    Discover elegant coffee spots near you with curated collections, smarter ranking, rich cafe profiles, and beautifully guided exploration.
+                </p>
+                <div class="hero-cups reveal reveal-delay-3" aria-hidden="true">
+                    <div class="cup-wrap">
+                        <div class="cup-steam-set"><span></span><span></span><span></span></div>
+                        <div class="cup-body"></div>
+                    </div>
+                    <div class="cup-wrap">
+                        <div class="cup-steam-set"><span></span><span></span><span></span></div>
+                        <div class="cup-body"></div>
+                    </div>
+                    <div class="cup-wrap">
+                        <div class="cup-steam-set"><span></span><span></span><span></span></div>
+                        <div class="cup-body"></div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="hero-panel reveal reveal-delay-2">
+                <div class="hero-panel-line">Search any neighborhood, landmark, or city</div>
+                <div class="hero-panel-stat">
+                    <span>Discovery</span>
+                    <strong>Signature picks</strong>
+                </div>
+                <div class="hero-panel-stat">
+                    <span>Personal</span>
+                    <strong>Collections + saves</strong>
+                </div>
+                <div class="hero-panel-stat">
+                    <span>Decision</span>
+                    <strong>Insights at a glance</strong>
+                </div>
+            </aside>
+        </section>
+
+        <section class="search-section reveal reveal-delay-3">
+            <div class="searchbar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search cafes, areas, or landmarks">
+                <button class="search-btn" id="searchBtn" type="button">Search</button>
+            </div>
+
+            <div class="search-meta">
+                <div class="meta-group">
+                    <div class="meta-label">Start Here</div>
+                    <div class="pill-row" id="quickSearches">
+                        <button class="meta-pill" data-query="Bandra, Mumbai" type="button">Bandra</button>
+                        <button class="meta-pill" data-query="Juhu, Mumbai" type="button">Juhu</button>
+                        <button class="meta-pill" data-query="Lower Parel, Mumbai" type="button">Lower Parel</button>
+                        <button class="meta-pill" data-query="Colaba, Mumbai" type="button">Colaba</button>
+                    </div>
+                </div>
+                <div class="meta-group">
+                    <div class="meta-label">Recent Searches</div>
+                    <div class="pill-row" id="recentSearches"></div>
+                </div>
+            </div>
+
+            <div class="filter-chips">
+                <button class="chip" id="nearMeBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path>
+                        <circle cx="12" cy="9" r="2.5"></circle>
+                    </svg>
+                    Near me
+                </button>
+                <button class="chip" id="topRatedBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    Top rated
+                </button>
+                <button class="chip" id="openNowBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Open now
+                </button>
+            </div>
+
+            <div class="onboarding-panel" id="onboardingPanel">
+                <div class="panel-eyebrow">Guided Discovery</div>
+                <div class="onboarding-grid">
+                    <article class="onboarding-card">
+                        <h3>Curated entry points</h3>
+                        <p>Start with neighborhoods or let NoirBrew surface editorial picks like work-friendly corners, outdoor gems, and date-night favorites.</p>
+                    </article>
+                    <article class="onboarding-card">
+                        <h3>Smarter decision signals</h3>
+                        <p>See rating, review count, distance, price, open status, and a generated insight line before you even open a cafe profile.</p>
+                    </article>
+                    <article class="onboarding-card">
+                        <h3>Save with intent</h3>
+                        <p>Organize favorites into collections like Work Spots, Weekend, or Must Try and share your shortlist in one click.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="signature-section" id="signatureSection">
+            <div class="section-divider">
+                <span class="section-label">Signature Picks</span>
+            </div>
+            <div class="section-topline">
+                <div>
+                    <h2 class="results-title">Curated For This Search</h2>
+                    <p class="results-subtitle">Editorial-feeling pathways through your live results.</p>
+                </div>
+            </div>
+            <div class="signature-grid" id="signatureGrid"></div>
+        </section>
+
+        <section class="results-section" id="resultsSection">
+            <div class="section-divider">
+                <span class="section-label" id="resultsCount">Loading...</span>
+            </div>
+
+            <div class="results-header">
+                <div>
+                    <h2 class="results-title" id="resultsTitle">Nearby Cafes</h2>
+                    <p class="results-subtitle" id="resultsSubtitle">Refined recommendations with fast actions and elegant discovery.</p>
+                </div>
+                <div class="results-actions">
+                    <div class="sort-wrap">
+                        <label class="meta-label" for="sortSelect">Sort</label>
+                        <select class="sort-select" id="sortSelect">
+                            <option value="recommended">Recommended</option>
+                            <option value="nearest">Nearest</option>
+                            <option value="highest-rated">Highest rated</option>
+                            <option value="most-reviewed">Most reviewed</option>
+                            <option value="budget-friendly">Budget-friendly</option>
+                            <option value="open-now">Open now</option>
+                        </select>
+                    </div>
+                    <button class="filter-toggle-btn" id="filterToggleBtn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        Filters
+                    </button>
+                </div>
+            </div>
+
+            <div class="active-statebar">
+                <div class="state-copy" id="activeViewLabel">Showing your best matches.</div>
+                <div class="pill-row" id="activeCollectionPills"></div>
+            </div>
+
+            <div class="cafe-grid" id="cafeGrid"></div>
+        </section>
+
+        <section class="favorites-section hidden" id="favoritesSection">
+            <div class="favorites-header">
+                <button class="back-btn" id="backBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to explore
+                </button>
+                <div class="favorites-headline">
+                    <h1 class="favorites-title">
+                        <svg viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        My Favorites
+                    </h1>
+                    <p class="favorites-count" id="favoritesCount">0 saved spots</p>
+                </div>
+                <button class="header-btn" id="shareShortlistBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                    <span>Share shortlist</span>
+                </button>
+            </div>
+
+            <div class="collections-row" id="collectionTabs"></div>
+
+            <div class="empty-favorites" id="emptyFavorites">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+                <h2 class="empty-title">No favorites yet</h2>
+                <p class="empty-description">Save cafes from the results grid and build collections for work sessions, weekends, date nights, or city lists.</p>
+                <button class="explore-btn" id="exploreCafesBtn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Explore cafes
+                </button>
+            </div>
+
+            <div class="cafe-grid hidden" id="favoritesGrid"></div>
+        </section>
+    </main>
+
+    <div class="filter-modal" id="filterModal">
+        <div class="filter-panel">
+            <div class="filter-header">
+                <h2 class="filter-title">Filters</h2>
+                <button class="close-btn" id="closeFilterBtn" type="button" aria-label="Close filters">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-section-title">Rating</h3>
+                <div class="filter-options">
+                    <button class="filter-option active" data-filter="rating" data-value="any" type="button">Any</button>
+                    <button class="filter-option" data-filter="rating" data-value="3.5" type="button">3.5+</button>
+                    <button class="filter-option" data-filter="rating" data-value="4" type="button">4.0+</button>
+                    <button class="filter-option" data-filter="rating" data-value="4.5" type="button">4.5+</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-section-title">Price</h3>
+                <div class="filter-options">
+                    <button class="filter-option" data-filter="price" data-value="1" type="button">₹</button>
+                    <button class="filter-option" data-filter="price" data-value="2" type="button">₹₹</button>
+                    <button class="filter-option" data-filter="price" data-value="3" type="button">₹₹₹</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-section-title">Max Distance</h3>
+                <div class="distance-value" id="distanceValue">10 km</div>
+                <input type="range" class="distance-slider" id="distanceSlider" min="1" max="10" value="10" step="1">
+                <div class="distance-labels">
+                    <span>1 km</span>
+                    <span>3 km</span>
+                    <span>5 km</span>
+                    <span>10 km</span>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-section-title">Ambience</h3>
+                <div class="filter-options">
+                    <button class="filter-option" data-filter="ambience" data-value="open-air" type="button">Open Air</button>
+                    <button class="filter-option" data-filter="ambience" data-value="outdoor" type="button">Outdoor</button>
+                    <button class="filter-option" data-filter="ambience" data-value="indoor" type="button">Indoor</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-section-title">Diet</h3>
+                <div class="filter-options">
+                    <button class="filter-option" data-filter="diet" data-value="veg" type="button">Veg</button>
+                    <button class="filter-option" data-filter="diet" data-value="non-veg" type="button">Non-Veg</button>
+                    <button class="filter-option" data-filter="diet" data-value="vegan" type="button">Vegan</button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3 class="filter-section-title">Experience</h3>
+                <div class="filter-options">
+                    <button class="filter-option" data-filter="experience" data-value="fine-dining" type="button">Fine Dining</button>
+                    <button class="filter-option" data-filter="experience" data-value="casual" type="button">Casual</button>
+                    <button class="filter-option" data-filter="experience" data-value="clubbing" type="button">Clubbing</button>
+                </div>
+            </div>
+
+            <button class="apply-filters-btn" id="applyFiltersBtn" type="button">
+                <span id="applyBtnText">Show cafes</span>
+            </button>
+        </div>
+    </div>
+
+    <aside class="detail-drawer hidden" id="detailDrawer">
+        <div class="detail-scrim" id="detailScrim"></div>
+        <div class="detail-panel">
+            <button class="close-btn detail-close" id="detailCloseBtn" type="button" aria-label="Close details">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="detail-media" id="detailMedia"></div>
+            <div class="detail-content" id="detailContent"></div>
+        </div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="main.js?v=20260415"></script>
+</body>
+</html>
