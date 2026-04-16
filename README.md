@@ -1,140 +1,135 @@
 # ☕ NoirBrew - Cafe Finder
 
-A beautiful web application to discover cafes near you using SerpApi Google Maps search results.
+NoirBrew is a responsive web app that helps you discover great cafes near any location (or near you) using SerpApi’s Google Maps results. It includes a modern UI, list + map views, favorites, and dark/light mode.
 
-## 🛡️ Security
+## 🌐 Live Demo (Render)
 
-This version includes:
-- ✅ SerpApi key stored in `.env`
-- ✅ `.gitignore` to prevent sensitive files from being pushed
-- ✅ No API keys in frontend code
+The project is deployed on Render:
 
-## 🚀 Quick Start
+- **Live site:** https://cafe-finder-7dhr.onrender.com
 
-### Prerequisites
-- Python 3.8+
-- SerpApi key ([Get one here](https://serpapi.com/))
+## ✨ Key Features
 
-### Setup
+- 🔍 Search cafes by **location** (e.g., “New York”) or use **current location**
+- 🗺️ **List + Map** views with interactive markers
+- ⭐ Ratings + review counts
+- 🕒 Opening hours / open–closed state (when available)
+- 💰 Price level indicators (when available)
+- 📍 Directions link to Google Maps
+- ❤️ Favorites (saved in browser `localStorage`)
+- 🌓 Dark/Light mode
+- 📱 Fully responsive layout
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/RachitMittal-20/cafe_finder.git
-   cd cafe_finder
-   ```
+## 🧱 Tech Stack
 
-2. **Create and activate virtual environment:**
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate  # On macOS/Linux
-   # .venv\Scripts\activate   # On Windows
-   ```
-
-3. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Configure API key:**
-   ```bash
-   cp .env.example .env
-# Edit .env and add your SerpApi key
-   ```
-
-5. **Start the backend server:**
-   ```bash
-   python3 pyscrpt.py
-   ```
-
-6. **Open in browser:**
-   - Open `index.html` in your browser, or
-   - Use VS Code Live Server extension, or
-   - Run: `python3 -m http.server 8000` and visit `http://localhost:8000`
+- **Frontend:** HTML, CSS, JavaScript
+- **Backend:** Python (Flask)
+- **Data Source:** SerpApi (Google Maps engine)
+- **Deployment:** Render
 
 ## 📁 Project Structure
 
 ```
 cafe_finder/
 ├── index.html              # Main HTML file
-├── main.css               # Styles
-├── main.js                # Frontend JavaScript
-├── pyscrpt.py             # Flask backend API
-├── .env                   # API keys (DO NOT COMMIT!)
-├── .env.example           # Example environment file
-├── .gitignore             # Git ignore rules
-├── requirements.txt       # Python dependencies
-└── SECURITY_DEPLOYMENT.md # Security & deployment guide
+├── main.css                # Styles
+├── main.js                 # Frontend JavaScript
+├── pyscrpt.py              # Flask backend API
+├── .env.example            # Example environment file
+├── .gitignore              # Git ignore rules
+├── requirements.txt        # Python dependencies
+├── SECURITY_DEPLOYMENT.md  # Security & deployment guide
+├── MAPS_INTEGRATION.md     # Map view documentation
+├── RESPONSIVE_DESIGN.md    # Responsive UI notes
+└── TESTING_GUIDE.md        # Manual testing checklist
 ```
 
-## 🔑 API Endpoints
+## 🔐 Environment Variables
 
-- `GET /api/cafes?location=<location>&radius=<radius>` - Search cafes by location
-- `POST /api/cafes/nearby` - Search cafes by coordinates
+Create a `.env` file (do **not** commit it) and add your SerpApi key:
 
-## 🌐 Deployment
+```env
+SERPAPI_KEY=your_serpapi_key_here
+```
 
-**Note:** Your app currently runs on localhost only. To make it accessible to others:
+You can copy from the example:
 
-See `SECURITY_DEPLOYMENT.md` for detailed deployment options including:
-- Render.com (Recommended)
-- Vercel + Render
-- Railway.app
-- GitHub Pages (static only)
+```bash
+cp .env.example .env
+```
 
-## 🔒 Important Security Notes
+## 🚀 Run Locally
 
-1. **Never commit `.env` file** - It's now in `.gitignore`
-2. **Regenerate your API key** if it was previously exposed
-3. **Set up API restrictions** in Google Cloud Console:
-   - Restrict by HTTP referrer for your domain
-   - Enable only required APIs (Maps, Places, Geocoding)
-4. **Monitor API usage** in Google Cloud Console
-5. **Set up billing alerts** to prevent surprise charges
+### Prerequisites
 
-## 🛠️ Features
+- Python **3.8+**
+- A SerpApi key: https://serpapi.com/
 
-- 🔍 Search cafes by location or use current location
-- 🗺️ Interactive map view with markers
-- ⭐ Ratings and reviews
-- 📍 Distance and directions
-- 💰 Price level indicators
-- 🕒 Opening hours
-- ❤️ Save favorites (localStorage)
-- 🌓 Dark/Light mode
-- 📱 Responsive design
+### 1) Clone
+
+```bash
+git clone https://github.com/RachitMittal-20/cafe_finder.git
+cd cafe_finder
+```
+
+### 2) Create a virtual environment
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+# .venv\Scripts\activate   # Windows
+```
+
+### 3) Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4) Start the backend (Flask)
+
+```bash
+python3 pyscrpt.py
+```
+
+The API will be available locally (commonly on `http://localhost:5000` or `http://localhost:5001`, depending on your setup).
+
+### 5) Start the frontend
+
+Open `index.html` in your browser, or use a local static server:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then visit:
+
+- http://localhost:8000
+
+## 🔌 API Endpoints
+
+- `GET /api/cafes?location=<location>&radius=<radius>`
+  - Example: `/api/cafes?location=London&radius=5000`
+- `POST /api/cafes/nearby`
+  - Body: `{"lat": <lat>, "lng": <lng>, "radius": <radius>}`
+
+## 🛡️ Security Notes
+
+- Never commit `.env` (it’s in `.gitignore`).
+- If a key was ever exposed, rotate it immediately.
+- Prefer using environment variables on Render for production.
 
 ## 🤝 Contributing
 
-1. Fork the repository
+1. Fork the repo
 2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+3. Make changes + test
+4. Open a pull request
 
 ## 📄 License
 
-MIT License - Feel free to use this project for learning and personal use.
-
-## 🆘 Troubleshooting
-
-### Backend won't start
-- Check that `.env` file exists and contains a valid `SERPAPI_KEY`
-- Ensure all dependencies are installed: `pip install -r requirements.txt`
-- Port 5001 might be in use: `lsof -ti:5001 | xargs kill -9`
-
-### No cafes showing
-- Make sure backend is running: `python3 pyscrpt.py`
-- Check browser console for errors (F12)
-- Verify your SerpApi key is active
-
-### API key errors
-- Verify `SERPAPI_KEY` is set in `.env`
-
-## 📞 Support
-
-- Report issues: [GitHub Issues](https://github.com/RachitMittal-20/cafe_finder/issues)
-- Security concerns: See `SECURITY_DEPLOYMENT.md`
+MIT
 
 ---
 
-**⚠️ Remember:** Never share your API keys publicly! Always keep `.env` file private and secure.
+If you find a bug or want to suggest improvements, please open an issue in the repository.
